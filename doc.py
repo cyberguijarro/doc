@@ -167,15 +167,17 @@ def clean(database, path):
     else:
         return (STATUS_ERROR, 'No entries for %s.' % path)
 
-def _list(database):
+def _list(database, *args):
     entries = 0
 
     for key in database.keys():
         path = key.split(':')[0]
-        line = int(key.split(':')[1]) + 1
-        entry = pickle.loads(database[key])
-        print '[%s:%d] %s' %(path, line, entry.text)
-        entries = entries + 1
+
+        if (len(args) == 0) or (path == args[0]):
+            line = int(key.split(':')[1]) + 1
+            entry = pickle.loads(database[key])
+            print '[%s:%d] %s' %(path, line, entry.text)
+            entries = entries + 1
 
     return (STATUS_SUCCESS, '%d entries listed.' % entries)
 
