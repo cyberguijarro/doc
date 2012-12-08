@@ -178,9 +178,7 @@ def _list(database, *args):
         path = key.split(':')[0]
 
         if (len(args) == 0) or (path == args[0]):
-            line = int(key.split(':')[1]) + 1
-            entry = pickle.loads(database[key])
-            print '[%s:%d] %s' %(path, line, entry.text)
+            print int(key.split(':')[1]) + 1
             entries = entries + 1
 
     return (STATUS_SUCCESS, '%d entries listed.' % entries)
