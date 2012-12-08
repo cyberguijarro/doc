@@ -104,7 +104,7 @@ def get(database, path, line):
     line = int(line) - 1
     key = '%s:%s' % (path, line)
 
-    if key in database:
+    if key in database.keys():
         entry = pickle.loads(database[key])
         return (STATUS_SUCCESS, entry.text)
     else:
@@ -116,7 +116,7 @@ def update(database, path):
     updated = 0
     orphaned = 0
 
-    for key in database:
+    for key in database.keys():
         if key.split(':')[0] == path:
             line = int(key.split(':')[1])
             entry = pickle.loads(database[key])
@@ -146,7 +146,7 @@ def remove(database, path, line):
     line = int(line) - 1
     key = '%s:%d' % (path, line)
     
-    if key in database:
+    if key in database.keys():
         del database[key]
         return (STATUS_SUCCESS, '%s:%d removed.' % (path, line + 1))
     else:
@@ -155,7 +155,7 @@ def remove(database, path, line):
 def clean(database, path):
     entries = []
     
-    for key in database:
+    for key in database.keys():
         if key.split(':')[0] == path:
             entries.append(key)
 
@@ -170,7 +170,7 @@ def clean(database, path):
 def _list(database):
     entries = 0
 
-    for key in database:
+    for key in database.keys():
         path = key.split(':')[0]
         line = int(key.split(':')[1]) + 1
         entry = pickle.loads(database[key])
