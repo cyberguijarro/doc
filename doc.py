@@ -91,10 +91,14 @@ def extract_context(lines, line):
 
 # Commands
 
-def put(database, path, line, text):
+def put(database, path, line):
     line = int(line) - 1
     lines = load_file(path)
     key = '%s:%s' % (path, line)
+    text = ""
+
+    for temp in sys.stdin:
+        text += temp
 
     database[key] = pickle.dumps(Entry(extract_context(lines, line), text))
 
@@ -186,7 +190,7 @@ def default(database, *args):
 
 database = anydbm.open('doc', 'c')
 commands = {
-    'put': (put, 3),
+    'put': (put, 2),
     'get': (get, 2),
     'update': (update, 1),
     'remove': (remove, 2),
