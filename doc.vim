@@ -56,3 +56,6 @@ command! DocPut call DocPut()
 command! DocGet call DocGet()
 command! DocDel call DocRemove()
 command! DocUpd call DocUpdate()
+
+autocmd FileWritePost * :DocUpd
+autocmd FileReadPost * :DocLd
