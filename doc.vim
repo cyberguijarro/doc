@@ -20,10 +20,9 @@ function! DocLoad(path)
 endfunction
 
 function! SaveBuffer()
-    execute '1,$!python doc.py put ' . b:doc_path . ' ' . b:doc_line
+    execute ':silent! 1,$write !python doc.py put ' . b:doc_path . ' ' . b:doc_line
     call DocLoad(b:doc_path)
     setlocal nomodified
-    quit
 endfunction
 
 function! Doc(path, line)
@@ -42,6 +41,7 @@ function! Doc(path, line)
     endif
 
     call append(0, split(text, '\n')) 
+    setlocal nomodified
 endfunction
 
 function! DocRemove(path, line)
