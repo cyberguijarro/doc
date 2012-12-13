@@ -5,6 +5,13 @@ if has("signs") == 0
 	finish
 endif
 
+if has("autocmd") == 0
+	echohl ErrorMsg
+	echo "Doc requires Vim to have +autocmd support."
+	echohl None
+	finish
+endif
+
 execute ":sign define doc text=## texthl=Search"
 
 function! DocLoad(path)
