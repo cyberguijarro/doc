@@ -7,27 +7,27 @@ endif
 
 execute ":sign define doc text=## texthl=Search"
 
-function! DocLoad()
-    let entries = system('python doc.py list ' . expand("%"))
+function! DocLoad(path)
+    let entries = system('python doc.py list ' . a:path)
     let lines = split(entries, '\n')
     let id = 1
     execute ":sign unplace *"
 
     for line in lines
-        execute ":sign place " . id . " line=" . line . " name=doc buffer=" . bufnr(expand("%"))
+        execute ":sign place " . id . " line=" . line . " name=doc buffer=" . bufnr(a:path)
         let id = id + 1
     endfor
 endfunction
 
-function! DocPut()
-    let path = expand("%")
-    let line = line(".") 
-    execute '!python doc.py put ' . path . ' ' . line
-    call DocLoad()
+function! SaveBuffer()
+    execute '1,$!python doc.py put ' . b:doc_path . ' ' . b:doc_line
+    call DocLoad(b:doc_path)
+    setlocal nomodified
+    quit
 endfunction
 
-function! DocGet()
-    let text = system('python doc.py get ' . expand("%") . ' ' . line("."))
+function! Doc(path, line)
+    let text = system('python doc.py get ' . a:path . ' ' . a:line)
     let number = bufwinnr('^[Documentation]$')
     
     if ( number >= 0 )
@@ -35,27 +35,29 @@ function! DocGet()
         execute 'normal ggdG'
     else
         new [Documentation]
-        setlocal buftype=nofile bufhidden=wipe nobuflisted noswapfile nowrap
+        setlocal buftype=acwrite bufhidden=wipe nobuflisted noswapfile nowrap
+        let b:doc_path = a:path
+        let b:doc_line = a:line
+        autocmd BufWriteCmd <buffer> :call SaveBuffer()
     endif
 
     call append(0, split(text, '\n')) 
 endfunction
 
-function! DocRemove()
-    execute ':silent !python doc.py remove ' . expand("%") . ' ' . line(".")
-    call DocLoad()
+function! DocRemove(path, line)
+    execute ':silent !python doc.py remove ' . a:path . ' ' . a:line
+    call DocLoad(a:path)
 endfunction
 
-function! DocUpdate()
-    execute ':silent !python doc.py update ' . expand("%")
-    call DocLoad()
+function! DocUpdate(path)
+    execute ':silent !python doc.py update ' . a:path
+    call DocLoad(a:path)
 endfunction
 
-command! DocLd call DocLoad()
-command! DocPut call DocPut()
-command! DocGet call DocGet()
-command! DocDel call DocRemove()
-command! DocUpd call DocUpdate()
+command! DocLd call DocLoad(expand("%"))
+command! Doc call Doc(expand("%"), line("."))
+command! DocDel call DocRemove(expand("%"), line("."))
+command! DocUpd call DocUpdate(expand("%"))
 
-autocmd FileWritePost * :DocUpd
+autocmd FileWritePost * :DocUpd | DocLd
 autocmd FileReadPost * :DocLd
