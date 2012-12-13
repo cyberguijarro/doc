@@ -35,12 +35,14 @@ endfunction
 function! Doc(path, line)
     let text = system('python doc.py get ' . a:path . ' ' . a:line)
     let number = bufwinnr('^[Documentation]$')
+    let height = winheight(0) / 4
     
     if ( number >= 0 )
         execute number . 'wincmd w'
         execute 'normal ggdG'
     else
         new [Documentation]
+        execute ':resize ' . height
         setlocal buftype=acwrite bufhidden=wipe nobuflisted noswapfile nowrap
         let b:doc_path = a:path
         let b:doc_line = a:line
