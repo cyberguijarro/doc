@@ -219,7 +219,6 @@ commands = {
 
 (status, message, changed) = (STATUS_ERROR, 'No command supplied.', False)
 
-
 if len(sys.argv) > 1:
     (method, parameters) = commands.get(sys.argv[1], (default, 0))
     if len(sys.argv) - 2 >= parameters:
@@ -231,6 +230,6 @@ print message
 
 if changed:
     with open(DATABASE_NAME, 'w+') as stream:
-        json.dump(database, stream, indent=2, sort_keys=True, default=entry_to_json)
+        json.dump(database, stream, indent=2, sort_keys=True, default=entry_to_json_serializable)
 
 sys.exit(status)
