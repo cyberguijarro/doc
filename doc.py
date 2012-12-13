@@ -115,7 +115,7 @@ def put(database, path, line):
     for temp in sys.stdin:
         text += temp
 
-    database[key] = Entry(extract_context(lines, line), text)
+    database[key] = Entry(extract_context(lines, line), text.rstrip())
 
     return (STATUS_SUCCESS, 'Update successful.', True)
 
