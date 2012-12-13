@@ -10,12 +10,11 @@ execute ":sign define doc text=## texthl=Search"
 function! DocLoad()
     let entries = system('python doc.py list ' . expand("%"))
     let lines = split(entries, '\n')
-    let lines = lines[0:-2]
     let id = 1
     execute ":sign unplace *"
 
     for line in lines
-	    execute ":sign place " . id . " line=" . line . " name=doc buffer=" . bufnr(expand("%"))
+        execute ":sign place " . id . " line=" . line . " name=doc buffer=" . bufnr(expand("%"))
         let id = id + 1
     endfor
 endfunction
@@ -23,7 +22,7 @@ endfunction
 function! DocPut()
     let path = expand("%")
     let line = line(".") 
-    execute ':!python doc.py put ' . path . ' ' . line
+    execute '!python doc.py put ' . path . ' ' . line
     call DocLoad()
 endfunction
 
@@ -43,12 +42,12 @@ function! DocGet()
 endfunction
 
 function! DocRemove()
-    execute ':!python doc.py remove ' . expand("%") . ' ' . line(".")
+    execute ':silent !python doc.py remove ' . expand("%") . ' ' . line(".")
     call DocLoad()
 endfunction
 
 function! DocUpdate()
-    execute ':!python doc.py update ' . expand("%")
+    execute ':silent !python doc.py update ' . expand("%")
     call DocLoad()
 endfunction
 
