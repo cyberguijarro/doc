@@ -2,12 +2,15 @@ import json
 import sys
 import difflib
 import os.path
+import logging
 
 # Configuration
 
 CONTEXT_LINES = 2
 SIMILARITY_THRESHOLD = 0.75
 DATABASE_NAME = 'doc.db'
+VERBOSE = False 
+DEBUG = False
 
 # Constants
 
@@ -122,7 +125,8 @@ def get(database, path, line):
 
     if key in database.keys():
         entry = database[key]
-        return (STATUS_SUCCESS, entry.text, False)
+        print entry.text
+        return (STATUS_SUCCESS, 'Done.', False)
     else:
         return (STATUS_ERROR, 'Entry for %s:%s not found.' % (path, line + 1), False)
 
@@ -136,14 +140,14 @@ def update(database, path):
         if key.split(':')[0] == path:
             line = int(key.split(':')[1])
             entry = database[key]
-            print 'processing', line + 1
+            logging.info('Processing comment at %d...', line + 1)
             processed = processed + 1
             
             if entry.get_context() != extract_context(lines, line):
                 previous_line = line
                 line = find(entry.get_context(), lines, previous_line)
                 
-                print previous_line + 1, 'has moved to', line + 1
+                logging.debug('%d has moved to %d.', previous_line + 1, line + 1)
                 
                 if line != None:
                     del database[key]
@@ -154,7 +158,7 @@ def update(database, path):
                 else:
                     orphaned = orphaned + 1
             else:
-                print line + 1, 'matched.'
+                logging.debug('%d matched.', line + 1)
 
     return (STATUS_SUCCESS, 'Done (%d processed, %d updated, %d orphaned).' % (processed, updated, orphaned), (updated > 0))
 
@@ -203,7 +207,7 @@ if os.path.exists(DATABASE_NAME):
         try:
             database = json.load(stream, object_hook=entry_from_dict)
         except:
-            print 'Error opening database.'
+            logging.warning('Error opening database.')
             database = {}
 else:
     database = {}
@@ -219,6 +223,12 @@ commands = {
 
 (status, message, changed) = (STATUS_ERROR, 'No command supplied.', False)
 
+if VERBOSE:
+    logging.basicConfig(level=logging.INFO)
+
+if DEBUG:
+    logging.basicConfig(level=logging.DEBUG)
+
 if len(sys.argv) > 1:
     (method, parameters) = commands.get(sys.argv[1], (default, 0))
     if len(sys.argv) - 2 >= parameters:
@@ -226,7 +236,7 @@ if len(sys.argv) > 1:
     else:
         (status, message, changed) = (STATUS_ERROR, 'Insufficient parameters.', False)
 
-print message
+logging.info(message)
 
 if changed:
     with open(DATABASE_NAME, 'w+') as stream:
