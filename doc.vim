@@ -27,7 +27,7 @@ function! DocLoad(path)
 endfunction
 
 function! SaveBuffer()
-    execute ':silent! 1,$write !python doc.py put ' . b:doc_path . ' ' . b:doc_line
+    execute ':silent! %write !python doc.py put ' . b:doc_path . ' ' . b:doc_line
     call DocLoad(b:doc_path)
     setlocal nomodified
 endfunction
@@ -47,7 +47,8 @@ function! Doc(path, line)
         autocmd BufWriteCmd <buffer> :call SaveBuffer()
     endif
 
-    call append(0, split(text, '\n')) 
+    call append(0, split(text, '\n'))
+    execute 'normal dd' 
     setlocal nomodified
 endfunction
 
