@@ -1,7 +1,7 @@
-import anydbm
+import json
 import sys
-import pickle
 import difflib
+import os.path
 
 # Configuration
 
@@ -89,6 +89,18 @@ def extract_context(lines, line):
 
     return (lines[start:line], lines[line], lines[line + 1:end])
 
+def entry_to_json_serializable(entry):
+    if isinstance(entry, Entry):
+        return {'context': entry.get_context(), 'text': entry.text}
+    else:
+        raise TypeError
+
+def entry_from_dict(_dict):
+    if 'context' in _dict and 'text' in _dict:
+        return Entry(_dict['context'], _dict['text'])
+    else:
+        return _dict
+
 # Commands
 
 def put(database, path, line):
@@ -100,19 +112,19 @@ def put(database, path, line):
     for temp in sys.stdin:
         text += temp
 
-    database[key] = pickle.dumps(Entry(extract_context(lines, line), text))
+    database[key] = Entry(extract_context(lines, line), text)
 
-    return (STATUS_SUCCESS, 'Update successful.')
+    return (STATUS_SUCCESS, 'Update successful.', True)
 
 def get(database, path, line):
     line = int(line) - 1
     key = '%s:%s' % (path, line)
 
     if key in database.keys():
-        entry = pickle.loads(database[key])
-        return (STATUS_SUCCESS, entry.text)
+        entry = database[key]
+        return (STATUS_SUCCESS, entry.text, False)
     else:
-        return (STATUS_ERROR, 'Entry for %s:%s not found.' % (path, line + 1))
+        return (STATUS_ERROR, 'Entry for %s:%s not found.' % (path, line + 1), False)
 
 def update(database, path):
     lines = load_file(path)
@@ -123,7 +135,7 @@ def update(database, path):
     for key in database.keys():
         if key.split(':')[0] == path:
             line = int(key.split(':')[1])
-            entry = pickle.loads(database[key])
+            entry = database[key]
             print 'processing', line + 1
             processed = processed + 1
             
@@ -137,14 +149,14 @@ def update(database, path):
                     del database[key]
                     key = '%s:%s' % (path, line)
                     entry.set_context(extract_context(lines, line))
-                    database[key] = pickle.dumps(entry)
+                    database[key] = entry
                     updated = updated + 1
                 else:
                     orphaned = orphaned + 1
             else:
                 print line + 1, 'matched.'
 
-    return (STATUS_SUCCESS, 'Done (%d processed, %d updated, %d orphaned).' % (processed, updated, orphaned))
+    return (STATUS_SUCCESS, 'Done (%d processed, %d updated, %d orphaned).' % (processed, updated, orphaned), (updated > 0))
 
 def remove(database, path, line):
     line = int(line) - 1
@@ -152,9 +164,9 @@ def remove(database, path, line):
     
     if key in database.keys():
         del database[key]
-        return (STATUS_SUCCESS, '%s:%d removed.' % (path, line + 1))
+        return (STATUS_SUCCESS, '%s:%d removed.' % (path, line + 1), True)
     else:
-        return (STATUS_ERROR, 'No entry found: %s:%d.' % (path, line + 1))
+        return (STATUS_ERROR, 'No entry found: %s:%d.' % (path, line + 1), False)
 
 def clean(database, path):
     entries = []
@@ -167,9 +179,9 @@ def clean(database, path):
         del database[entry]
 
     if entries:
-        return (STATUS_SUCCESS, '%d entries removed.' % len(entries))
+        return (STATUS_SUCCESS, '%d entries removed.' % len(entries), True)
     else:
-        return (STATUS_ERROR, 'No entries for %s.' % path)
+        return (STATUS_ERROR, 'No entries for %s.' % path, False)
 
 def _list(database, *args):
     entries = 0
@@ -181,12 +193,21 @@ def _list(database, *args):
             print int(key.split(':')[1]) + 1
             entries = entries + 1
 
-    return (STATUS_SUCCESS, '%d entries listed.' % entries)
+    return (STATUS_SUCCESS, '%d entries listed.' % entries, False)
 
 def default(database, *args):
-    return (STATUS_ERROR, 'Unknown command.')
+    return (STATUS_ERROR, 'Unknown command.', False)
 
-database = anydbm.open('doc', 'c')
+if os.path.exists(DATABASE_NAME):
+    with open(DATABASE_NAME, 'r') as stream:
+        try:
+            database = json.load(stream, object_hook=entry_from_dict)
+        except:
+            print 'Error opening database.'
+            database = {}
+else:
+    database = {}
+
 commands = {
     'put': (put, 2),
     'get': (get, 2),
@@ -196,15 +217,20 @@ commands = {
     'list': (_list, 0)
 } 
 
-(status, message) = (STATUS_ERROR, 'No command supplied.')
+(status, message, changed) = (STATUS_ERROR, 'No command supplied.', False)
+
 
 if len(sys.argv) > 1:
     (method, parameters) = commands.get(sys.argv[1], (default, 0))
     if len(sys.argv) - 2 >= parameters:
-        (status, message) = method(database, *sys.argv[2:])
+        (status, message, changed) = method(database, *sys.argv[2:])
     else:
-        (status, message) = (STATUS_ERROR, 'Insufficient parameters.')
+        (status, message, changed) = (STATUS_ERROR, 'Insufficient parameters.', False)
 
 print message
-database.close()
+
+if changed:
+    with open(DATABASE_NAME, 'w+') as stream:
+        json.dump(database, stream, indent=2, sort_keys=True, default=entry_to_json)
+
 sys.exit(status)
