@@ -45,12 +45,12 @@ function! Doc(path, line)
 endfunction
 
 function! DocRemove(path, line)
-    execute ':silent !python doc.py remove ' . a:path . ' ' . a:line
+    call system('python doc.py remove ' . a:path . ' ' . a:line)
     call DocLoad(a:path)
 endfunction
 
 function! DocUpdate(path)
-    execute ':silent !python doc.py update ' . a:path
+    call system('python doc.py update ' . a:path)
     call DocLoad(a:path)
 endfunction
 
@@ -59,5 +59,8 @@ command! Doc call Doc(expand("%"), line("."))
 command! DocDel call DocRemove(expand("%"), line("."))
 command! DocUpd call DocUpdate(expand("%"))
 
-autocmd FileWritePost * :DocUpd | DocLd
-autocmd FileReadPost * :DocLd
+augroup doc
+    autocmd!
+    autocmd BufWritePost * :DocUpd
+    autocmd BufReadPost * :DocLd
+augroup END
