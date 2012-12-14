@@ -10,8 +10,6 @@ import logging
 CONTEXT_LINES = 2
 SIMILARITY_THRESHOLD = 0.75
 DATABASE_NAME = 'doc.db'
-VERBOSE = False 
-DEBUG = False
 
 # Constants
 
@@ -227,18 +225,27 @@ commands = {
 
 (status, message, changed) = (STATUS_ERROR, 'No command supplied.', False)
 
-if VERBOSE:
-    logging.basicConfig(level=logging.INFO)
-
-if DEBUG:
-    logging.basicConfig(level=logging.DEBUG)
-
 if len(sys.argv) > 1:
-    (method, parameters) = commands.get(sys.argv[1], (default, 0))
-    if len(sys.argv) - 2 >= parameters:
-        (status, message, changed) = method(database, *sys.argv[2:])
-    else:
-        (status, message, changed) = (STATUS_ERROR, 'Insufficient parameters.', False)
+    position = 1
+
+    while sys.argv[position].startswith('-'):
+        if sys.argv[position] in ['--debug', '-d']:
+            logging.basicConfig(level=logging.DEBUG)
+        elif sys.argv[position] in ['--verbose', '-v']:
+            logging.basicConfig(level=logging.INFO)
+        else:
+            logging.error('Unknown option: %s', sys.argv[position])
+            sys.exit(status)
+
+        position += 1
+
+    if len(sys.argv) > position:
+        (method, parameters) = commands.get(sys.argv[position], (default, 0))
+
+        if len(sys.argv) - position - 1 >= parameters:
+            (status, message, changed) = method(database, *sys.argv[position + 1:])
+        else:
+            (status, message, changed) = (STATUS_ERROR, 'Insufficient parameters.', False)
 
 logging.info(message)
 
