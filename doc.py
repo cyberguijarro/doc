@@ -194,7 +194,10 @@ def _list(database, *args):
     for key in database.keys():
         path = key.split(':')[0]
 
-        if (len(args) == 0) or (path == args[0]):
+        if len(args) == 0:
+            print path, int(key.split(':')[1]) + 1
+            entries = entries + 1
+        elif path == args[0]:
             print int(key.split(':')[1]) + 1
             entries = entries + 1
 
