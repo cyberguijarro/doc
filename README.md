@@ -129,6 +129,17 @@ Every time you save a buffer, the database portion of the file is automatically 
 :DocUpd
 </pre>
 
+#### Mappings
+
+Vim comes with no default command mappings, it is up to the user to configure whatever he deems appropiate in his .vimrc. Here's an example:
+
+<pre>
+nnoremap <silent> <F6> :DocLd<CR>
+nnoremap <silent> <F5> :Doc<CR>
+nnoremap <silent> <F7> :DocDel<CR>
+nnoremap <silent> <F8> :DocUpd<CR>
+</pre>
+
 ### Other text editors
 
 I'm not going to learn how to write plugins for all of the exising IDEs and text editors out there. Soooooo, contributions are much welcome.
