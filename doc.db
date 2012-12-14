@@ -1,0 +1,128 @@
+{
+  "doc.py:20": {
+    "context": [
+      [
+        "# Data types\n", 
+        "\n"
+      ], 
+      "class Entry:\n", 
+      [
+        "    def __init__(self, context, text):\n", 
+        "        self.before = context[0]\n"
+      ]
+    ], 
+    "text": "Defines relevant data for each documentation entry, namely:\n\n* Context lines:\n  * N lines before current line\n  * Current line\n  * N lines after current line\n* Documentation text"
+  }, 
+  "doc.py:37": {
+    "context": [
+      [
+        "# Utility functions and generators\n", 
+        "\n"
+      ], 
+      "def similarity(a, b):\n", 
+      [
+        "    return difflib.SequenceMatcher(a=a, b=b).ratio()\n", 
+        "\n"
+      ]
+    ], 
+    "text": "Returns a similarity ration for strings a and b between 0.0 (absolutely no similarity) and 1.0 (similar strings)."
+  }, 
+  "doc.py:40": {
+    "context": [
+      [
+        "    return difflib.SequenceMatcher(a=a, b=b).ratio()\n", 
+        "\n"
+      ], 
+      "def similarity_sequences(a, b):\n", 
+      [
+        "    return sum([similarity(x,y) for x, y in zip(a, b)]) / max(1, len(a), len(b))\n", 
+        "\n"
+      ]
+    ], 
+    "text": "Returns a similarity ration for sequences a and b between 0.0 (absolutely no similarity) and 1.0 (similar sequences)."
+  }, 
+  "doc.py:43": {
+    "context": [
+      [
+        "    return sum([similarity(x,y) for x, y in zip(a, b)]) / max(1, len(a), len(b))\n", 
+        "\n"
+      ], 
+      "def explore(begin, end, start):\n", 
+      [
+        "    forward = True\n", 
+        "    forward_position = start + 1\n"
+      ]
+    ], 
+    "text": "Expores an integer range starting at _start_ and moving alternatively up and down.\n\nExample: [1, 2, 3, 4, 5] would be explored in the following sequence (starting at 5): [3, 4, 2, 5, 1]"
+  }, 
+  "doc.py:60": {
+    "context": [
+      [
+        "        forward = not forward\n", 
+        "\n"
+      ], 
+      "def find(context, lines, start):\n", 
+      [
+        "    scores = []\n", 
+        "\n"
+      ]
+    ], 
+    "text": "Finds the position of the lines in _context_ within _lines_ starting at line _start_ (searches in both directions)."
+  }, 
+  "doc.py:80": {
+    "context": [
+      [
+        "    return None\n", 
+        "\n"
+      ], 
+      "def load_file(path):\n", 
+      [
+        "    file = open(path, 'r')\n", 
+        "    lines = file.readlines()\n"
+      ]
+    ], 
+    "text": "Returns a string sequence containing all source file lines."
+  }, 
+  "doc.py:87": {
+    "context": [
+      [
+        "    return lines\n", 
+        "\n"
+      ], 
+      "def extract_context(lines, line):\n", 
+      [
+        "    start = max(0, line - CONTEXT_LINES)\n", 
+        "    end = min(line + CONTEXT_LINES + 1, len(lines))\n"
+      ]
+    ], 
+    "text": "Generates a line context, omitting before and after lines if they don't exist (file boundaries)."
+  }, 
+  "doc.py:93": {
+    "context": [
+      [
+        "    return (lines[start:line], lines[line], lines[line + 1:end])\n", 
+        "\n"
+      ], 
+      "def entry_to_json_serializable(entry):\n", 
+      [
+        "    if isinstance(entry, Entry):\n", 
+        "        return {'context': entry.get_context(), 'text': entry.text}\n"
+      ]
+    ], 
+    "text": "Used for JSON serialization of Entry objects."
+  }, 
+  "doc.py:99": {
+    "context": [
+      [
+        "        raise TypeError\n", 
+        "\n"
+      ], 
+      "def entry_from_dict(_dict):\n", 
+      [
+        "    if 'context' in _dict and 'text' in _dict:\n", 
+        "        return Entry(_dict['context'], _dict['text'])\n"
+      ]
+    ], 
+    "text": "Used for JSON deserialization of Entry objects."
+  }
+}
