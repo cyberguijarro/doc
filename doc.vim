@@ -38,7 +38,7 @@ function! Doc(path, line)
     
     new [Documentation]
     execute ':resize ' . height
-    setlocal buftype=acwrite bufhidden=wipe nobuflisted noswapfile nowrap
+    setlocal buftype=acwrite bufhidden=wipe nobuflisted noswapfile nowrap syntax=markdown
     let b:doc_path = a:path
     let b:doc_line = a:line
     autocmd BufWriteCmd <buffer> :call SaveBuffer()
