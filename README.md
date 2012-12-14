@@ -37,7 +37,7 @@ $
 
 ### What if my source code changes?
 
-Don't sweat it. doc has a powerful algorithm to detect and fix source code line changes and movements within your source files. Just make sure you run the "update" command every now and then (every time you save is even better):
+Don't sweat it. *doc* has a powerful algorithm to detect and fix source code line changes and movements within your source files. Just make sure you run the "update" command every now and then (every time you save is even better):
 
 <pre>
 $ doc update source.py
@@ -77,7 +77,7 @@ source.py 58
 
 ## Am I supossed to do this by hand?
 
-No. doc is intendend to be used through text editor or IDE plugins.
+No. *doc* is intendend to be used through text editor or IDE plugins.
 
 ### vim
 
@@ -99,7 +99,7 @@ Just move to the source line of you desire and type:
 :Doc
 </pre>
 
-and use the pop-up buffer to write your document your masterpiece. Once finished, use:
+and use the pop-up buffer to document your masterpiece. Once finished, use:
 
 <pre>
 :w
